@@ -1,59 +1,40 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:photo_library_kit/photo_library_kit.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MaterialApp(home: _Grid()));
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class _Grid extends StatefulWidget {
+  const _Grid();
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<_Grid> createState() => _GridState();
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _photoLibraryKitPlugin = PhotoLibraryKit();
+class _GridState extends State<_Grid> {
+  final assets = AssetPagedList();
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _photoLibraryKitPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
+    PhotoLibrary.requestPermission().then((s) {
+      if (s.hasAccess) assets.load();
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Plugin example app')),
-        body: Center(child: Text('Running on: $_platformVersion\n')),
+  Widget build(BuildContext context) => Scaffold(
+    body: ListenableBuilder(
+      listenable: assets,
+      builder: (context, _) => GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+        ),
+        itemCount: assets.length,
+        itemBuilder: (context, i) {
+          final a = assets[i];
+          return a == null ? const SizedBox() : AssetThumbnail(asset: a);
+        },
       ),
-    );
-  }
+    ),
+  );
 }
