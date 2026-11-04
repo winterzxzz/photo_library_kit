@@ -10,3 +10,7 @@ export 'src/types/media_filter.dart';
 export 'src/types/permission.dart';
 export 'src/types/photo_library_exception.dart';
 export 'src/types/thumbnail_options.dart';
+export 'src/image/media_image_provider.dart';
+export 'src/image/thumbnail_scheduler.dart';
+export 'src/paging/asset_paged_list.dart';
+export 'src/widgets/asset_thumbnail.dart';
