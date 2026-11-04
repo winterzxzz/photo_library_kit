@@ -409,33 +409,36 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
-    return ColoredBox(
-      color: _Ig.bg,
-      child: Row(
-        children: [
-          TextButton.icon(
-            onPressed: onAlbum,
-            iconAlignment: IconAlignment.end,
-            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
-            label: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+    // Must fill the extent exactly, or the sliver geometry is invalid.
+    return SizedBox.expand(
+      child: ColoredBox(
+        color: _Ig.bg,
+        child: Row(
+          children: [
+            TextButton.icon(
+              onPressed: onAlbum,
+              iconAlignment: IconAlignment.end,
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+              label: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-          const Spacer(),
-          _RoundButton(
-            icon: Icons.copy_all_outlined,
-            active: multi,
-            onTap: onMulti,
-          ),
-          const SizedBox(width: 10),
-          const _RoundButton(icon: Icons.photo_camera_outlined, onTap: _noop),
-          const SizedBox(width: 12),
-        ],
+            const Spacer(),
+            _RoundButton(
+              icon: Icons.copy_all_outlined,
+              active: multi,
+              onTap: onMulti,
+            ),
+            const SizedBox(width: 10),
+            const _RoundButton(icon: Icons.photo_camera_outlined, onTap: _noop),
+            const SizedBox(width: 12),
+          ],
+        ),
       ),
     );
   }
