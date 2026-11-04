@@ -1,6 +1,8 @@
 name: photo_library_kit
 description: "Fast, ergonomic access to the device photo & video library: paged queries, cancellable cached thumbnails, live change streams. Android & iOS."
 version: 0.1.0
+repository: https://github.com/winterzxzz/photo_library_kit
+issue_tracker: https://github.com/winterzxzz/photo_library_kit/issues
 topics:
   - photos
   - gallery
