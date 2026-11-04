@@ -156,6 +156,11 @@ class _BasicGalleryState extends State<BasicGallery> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
       builder: (context) => _Details(asset: asset),
     );
   }
@@ -211,7 +216,7 @@ class _DetailsState extends State<_Details> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: AspectRatio(
-                aspectRatio: a.aspectRatio.clamp(0.6, 2.0),
+                aspectRatio: a.aspectRatio.clamp(1.0, 2.0),
                 child: Image(
                   image: MediaImageProvider.preview(a, longestSide: 1200),
                   fit: BoxFit.cover,
