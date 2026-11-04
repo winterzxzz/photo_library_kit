@@ -30,6 +30,11 @@ public class PhotoLibraryKitPlugin: NSObject, FlutterPlugin, FlutterStreamHandle
       DispatchQueue.main.async { result(FlutterError(code: code, message: message, details: nil)) }
     }
 
+    // Cached fetch results are only correct while the observer keeps them
+    // fresh, so it is registered before the first query and kept for the
+    // plugin's lifetime; the Dart stream merely toggles delivery.
+    if call.method.hasPrefix("getA") { startObservingIfAuthorized() }
+
     switch call.method {
     case "getPermissionState":
       result(Self.wire(PHPhotoLibrary.authorizationStatus(for: Self.level(args))))
@@ -154,21 +159,24 @@ public class PhotoLibraryKitPlugin: NSObject, FlutterPlugin, FlutterStreamHandle
 
   // MARK: - Change stream
 
+  private func startObservingIfAuthorized() {
+    guard !observing else { return }
+    let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+    guard status == .authorized || status == .limited else { return }
+    // Anything cached before observation started may already be stale.
+    queries.queue.async { [queries] in queries.invalidate() }
+    PHPhotoLibrary.shared().register(self)
+    observing = true
+  }
+
   public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
     sink = events
-    if !observing {
-      PHPhotoLibrary.shared().register(self)
-      observing = true
-    }
+    startObservingIfAuthorized()
     return nil
   }
 
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
     sink = nil
-    if observing {
-      PHPhotoLibrary.shared().unregisterChangeObserver(self)
-      observing = false
-    }
     return nil
   }
 
