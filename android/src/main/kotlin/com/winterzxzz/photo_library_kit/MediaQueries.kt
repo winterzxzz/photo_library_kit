@@ -107,10 +107,11 @@ internal class MediaQueries(private val resolver: ContentResolver) {
     null, null, null,
   )?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
 
-  fun mimeType(id: String): String? = query(
-    arrayOf(MediaStore.MediaColumns.MIME_TYPE), "${MediaStore.MediaColumns._ID} = ?", arrayOf(id),
-    null, null, null,
-  )?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+  /** MIME type and modification time (seconds) used to key cached copies. */
+  fun mimeAndModified(id: String): Pair<String?, Long>? = query(
+    arrayOf(MediaStore.MediaColumns.MIME_TYPE, MediaStore.MediaColumns.DATE_MODIFIED),
+    "${MediaStore.MediaColumns._ID} = ?", arrayOf(id), null, null, null,
+  )?.use { c -> if (c.moveToFirst()) c.getString(0) to c.getLong(1) else null }
 
   private fun bucketOf(albumId: String): String? = if (albumId == ALL_ID) null else albumId
 
@@ -158,7 +159,9 @@ internal class MediaQueries(private val resolver: ContentResolver) {
       val ori = if (c.isNull(orientation)) 0 else c.getInt(orientation)
       var w = c.getInt(width)
       var h = c.getInt(height)
-      if (!isVideo && (ori == 90 || ori == 270)) {
+      // Both images and videos (API 30+ fills orientation for videos) store
+      // raw dimensions; report them as displayed.
+      if (ori == 90 || ori == 270) {
         val t = w; w = h; h = t
       }
       val addedMs = c.getLong(added) * 1000
