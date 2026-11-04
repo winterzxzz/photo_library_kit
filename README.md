@@ -148,7 +148,9 @@ The native observer runs only while the stream has listeners.
 
 ## Platform notes
 
-* Android sorts by `DATE_ADDED`; iOS by `creationDate`.
+* Android sorts and filters dates (`createdAfter`/`createdBefore`) by
+  `DATE_ADDED`, while `createdAt` reports the capture date when known; iOS uses
+  `creationDate` for all three.
 * `MediaFilter.includeGifs` is Android-only (PhotoKit has no predicate for it).
 * iOS returns `title`/`mimeType` from `getAsset` only. They need a slower
   resource lookup that paging skips for speed.
