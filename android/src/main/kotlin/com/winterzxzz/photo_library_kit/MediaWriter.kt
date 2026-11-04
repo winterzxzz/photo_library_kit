@@ -87,6 +87,7 @@ internal class MediaWriter(
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       if (activity == null) throw IllegalStateException("no_activity")
+      if (pendingDelete != null) throw IllegalStateException("busy")
       val request = MediaStore.createDeleteRequest(resolver, uris)
       pendingDelete = ids to done
       activity.startIntentSenderForResult(request.intentSender, DELETE_REQUEST, null, 0, 0, 0)
@@ -119,11 +120,21 @@ internal class MediaWriter(
     }
     val numeric = id.toLongOrNull() ?: return null
     val uri: Uri = ContentUris.withAppendedId(queries.filesUri, numeric)
-    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(queries.mimeType(id)) ?: "bin"
-    val out = File(cacheDir.apply { mkdirs() }, "$id.$ext")
-    if (out.exists() && out.length() > 0) return out.absolutePath
-    resolver.openInputStream(uri)?.use { input -> out.outputStream().use { input.copyTo(it) } }
-      ?: return null
+    val (mime, modified) = queries.mimeAndModified(id) ?: return null
+    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "bin"
+    // Keyed by modification time so edits never return a stale copy.
+    val out = File(cacheDir.apply { mkdirs() }, "${id}_$modified.$ext")
+    if (out.exists()) return out.absolutePath
+    // Unique temp + rename: a failed or concurrent copy never publishes a
+    // partial file.
+    val tmp = File.createTempFile("$id-", ".part", cacheDir)
+    try {
+      resolver.openInputStream(uri)?.use { input -> tmp.outputStream().use { input.copyTo(it) } }
+        ?: return null
+      if (!tmp.renameTo(out) && !out.exists()) return null
+    } finally {
+      tmp.delete()
+    }
     return out.absolutePath
   }
 
