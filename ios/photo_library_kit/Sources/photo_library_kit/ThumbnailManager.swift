@@ -63,8 +63,13 @@ final class ThumbnailManager {
     }
     lock.lock()
     // The handler may already have run synchronously for cached images.
-    if finishedEarly.remove(rid) == nil && id != PHInvalidImageRequestID { inFlight[rid] = id }
+    var cancelNow = false
+    if finishedEarly.remove(rid) == nil && id != PHInvalidImageRequestID {
+      // A cancel may have arrived while requestImage was running.
+      if cancelledEarly.remove(rid) != nil { cancelNow = true } else { inFlight[rid] = id }
+    }
     lock.unlock()
+    if cancelNow { manager.cancelImageRequest(id) }
   }
 
   func cancel(rid: Int) {
@@ -106,6 +111,8 @@ final class ThumbnailManager {
     guard target.width >= 1, target.height >= 1 else { return nil }
     let format = UIGraphicsImageRendererFormat()
     format.scale = 1
+    // 8-bit output: avoid wide-color/extended buffers for P3 photos.
+    format.preferredRange = .standard
     format.opaque = !req.png
     let renderer = UIGraphicsImageRenderer(size: target, format: format)
     if req.png {
