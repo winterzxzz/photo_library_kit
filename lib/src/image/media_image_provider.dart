@@ -92,11 +92,18 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
     ImageDecoderCallback decode,
     ThumbnailCancelToken token,
   ) async {
-    final bytes = await (scheduler ?? ThumbnailScheduler.instance).schedule(
-      key.asset,
-      key.options,
-      token: token,
-    );
+    final Uint8List? bytes;
+    try {
+      bytes = await (scheduler ?? ThumbnailScheduler.instance).schedule(
+        key.asset,
+        key.options,
+        token: token,
+      );
+    } catch (_) {
+      // A native error for a request nobody waits for is not worth reporting.
+      if (token.isCancelled) return Completer<ui.Codec>().future;
+      rethrow;
+    }
     if (token.isCancelled) {
       // Nobody is listening: never complete instead of reporting a bogus error.
       return Completer<ui.Codec>().future;
@@ -121,7 +128,6 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
   int get hashCode => Object.hash(asset, options, scale);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'MediaImageProvider')}'
+  String toString() => '${objectRuntimeType(this, 'MediaImageProvider')}'
       '(${asset.id}, $options, scale: $scale)';
 }
