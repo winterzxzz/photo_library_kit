@@ -14,7 +14,7 @@ import io.flutter.plugin.common.EventChannel
  */
 internal class ChangeObserver(
   private val resolver: ContentResolver,
-  private val uri: Uri,
+  private val uris: List<Uri>,
 ) : EventChannel.StreamHandler {
 
   private val handler = Handler(Looper.getMainLooper())
@@ -60,7 +60,9 @@ internal class ChangeObserver(
 
   override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
     sink = events
-    resolver.registerContentObserver(uri, true, observer)
+    // Before API 30 MediaProvider only notifies the collection that changed,
+    // not the shared files URI.
+    uris.forEach { resolver.registerContentObserver(it, true, observer) }
   }
 
   override fun onCancel(arguments: Any?) {

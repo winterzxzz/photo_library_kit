@@ -50,7 +50,14 @@ class PhotoLibraryKitPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     thumbnails = ThumbnailLoader(context.contentResolver, queries)
     writer = MediaWriter(context, queries)
     permissions = PermissionManager(context)
-    observer = ChangeObserver(context.contentResolver, queries.filesUri)
+    observer = ChangeObserver(
+      context.contentResolver,
+      listOf(
+        queries.filesUri,
+        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+      ),
+    )
     channel = MethodChannel(binding.binaryMessenger, "photo_library_kit")
     channel.setMethodCallHandler(this)
     events = EventChannel(binding.binaryMessenger, "photo_library_kit/changes")
@@ -141,7 +148,8 @@ class PhotoLibraryKitPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     try {
       writer.delete(activity, ids) { deleted -> main.post { result.success(deleted) } }
     } catch (e: IllegalStateException) {
-      result.error("no_activity", "Deleting requires a foreground activity", null)
+      if (e.message == "busy") result.error("busy", "A delete request is already in progress", null)
+      else result.error("no_activity", "Deleting requires a foreground activity", null)
     } catch (e: Exception) {
       result.error("io_error", e.message, null)
     }
