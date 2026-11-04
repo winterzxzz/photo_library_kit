@@ -12,10 +12,10 @@ enum AlbumKind {
   user;
 
   static AlbumKind fromWire(Object? value) => switch (value) {
-    0 => AlbumKind.all,
-    1 => AlbumKind.system,
-    _ => AlbumKind.user,
-  };
+        0 => AlbumKind.all,
+        1 => AlbumKind.system,
+        _ => AlbumKind.user,
+      };
 }
 
 /// An album (iOS asset collection) or folder (Android bucket).
@@ -48,20 +48,20 @@ class MediaAlbum {
   bool get isAll => kind == AlbumKind.all;
 
   factory MediaAlbum.fromWire(Map<Object?, Object?> map) => MediaAlbum(
-    id: map['id']! as String,
-    name: (map['name'] as String?) ?? '',
-    count: (map['count'] as int?) ?? 0,
-    kind: AlbumKind.fromWire(map['kind']),
-    coverId: map['cover'] as String?,
-  );
+        id: map['id']! as String,
+        name: (map['name'] as String?) ?? '',
+        count: (map['count'] as int?) ?? 0,
+        kind: AlbumKind.fromWire(map['kind']),
+        coverId: map['cover'] as String?,
+      );
 
   MediaAlbum copyWith({int? count, String? coverId}) => MediaAlbum(
-    id: id,
-    name: name,
-    count: count ?? this.count,
-    kind: kind,
-    coverId: coverId ?? this.coverId,
-  );
+        id: id,
+        name: name,
+        count: count ?? this.count,
+        kind: kind,
+        coverId: coverId ?? this.coverId,
+      );
 
   @override
   bool operator ==(Object other) =>

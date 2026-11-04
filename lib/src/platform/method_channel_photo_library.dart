@@ -103,12 +103,13 @@ class MethodChannelPhotoLibrary extends PhotoLibraryPlatform {
     MediaAsset asset,
     ThumbnailOptions options, {
     required int requestId,
-  }) => _invoke<Uint8List>('getThumbnail', {
-    'id': asset.id,
-    'type': asset.type.index,
-    'rid': requestId,
-    ...options.toWire(),
-  });
+  }) =>
+      _invoke<Uint8List>('getThumbnail', {
+        'id': asset.id,
+        'type': asset.type.index,
+        'rid': requestId,
+        ...options.toWire(),
+      });
 
   @override
   Future<void> cancelThumbnail(int requestId) =>
@@ -160,7 +161,6 @@ class MethodChannelPhotoLibrary extends PhotoLibraryPlatform {
   @override
   // Broadcast: the native observer runs only while at least one listener is
   // attached, and is torn down when the last one cancels.
-  Stream<LibraryChange> get changes => _changes ??= changeChannel
-      .receiveBroadcastStream()
-      .map(LibraryChange.fromWire);
+  Stream<LibraryChange> get changes => _changes ??=
+      changeChannel.receiveBroadcastStream().map(LibraryChange.fromWire);
 }

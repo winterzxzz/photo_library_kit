@@ -48,8 +48,8 @@ class PermissionRequest {
   final bool addOnly;
 
   Map<String, Object?> toWire() => {
-    'images': images,
-    'videos': videos,
-    'addOnly': addOnly,
-  };
+        'images': images,
+        'videos': videos,
+        'addOnly': addOnly,
+      };
 }

@@ -102,7 +102,6 @@ class MediaAsset {
   int get hashCode => Object.hash(id, modifiedAt);
 
   @override
-  String toString() =>
-      'MediaAsset($id, ${type.name}, ${width}x$height'
+  String toString() => 'MediaAsset($id, ${type.name}, ${width}x$height'
       '${isVideo ? ', $duration' : ''})';
 }

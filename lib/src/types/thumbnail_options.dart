@@ -25,8 +25,8 @@ class ThumbnailOptions {
     this.format = ThumbnailFormat.jpeg,
     this.fit = ThumbnailFit.cover,
     this.allowNetwork = true,
-  }) : assert(width > 0 && height > 0),
-       assert(quality > 0 && quality <= 100);
+  })  : assert(width > 0 && height > 0),
+        assert(quality > 0 && quality <= 100);
 
   /// Square thumbnail of [size] physical pixels.
   const ThumbnailOptions.square(
@@ -59,13 +59,13 @@ class ThumbnailOptions {
   final bool allowNetwork;
 
   Map<String, Object?> toWire() => {
-    'w': width,
-    'h': height,
-    'q': quality,
-    'fmt': format.index,
-    'fit': fit.index,
-    'net': allowNetwork,
-  };
+        'w': width,
+        'h': height,
+        'q': quality,
+        'fmt': format.index,
+        'fit': fit.index,
+        'net': allowNetwork,
+      };
 
   @override
   bool operator ==(Object other) =>

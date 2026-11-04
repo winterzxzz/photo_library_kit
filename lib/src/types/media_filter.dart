@@ -60,26 +60,27 @@ class MediaFilter {
     Duration? minVideoDuration,
     Duration? maxVideoDuration,
     bool? includeGifs,
-  }) => MediaFilter(
-    types: types ?? this.types,
-    sort: sort ?? this.sort,
-    createdAfter: createdAfter ?? this.createdAfter,
-    createdBefore: createdBefore ?? this.createdBefore,
-    minVideoDuration: minVideoDuration ?? this.minVideoDuration,
-    maxVideoDuration: maxVideoDuration ?? this.maxVideoDuration,
-    includeGifs: includeGifs ?? this.includeGifs,
-  );
+  }) =>
+      MediaFilter(
+        types: types ?? this.types,
+        sort: sort ?? this.sort,
+        createdAfter: createdAfter ?? this.createdAfter,
+        createdBefore: createdBefore ?? this.createdBefore,
+        minVideoDuration: minVideoDuration ?? this.minVideoDuration,
+        maxVideoDuration: maxVideoDuration ?? this.maxVideoDuration,
+        includeGifs: includeGifs ?? this.includeGifs,
+      );
 
   Map<String, Object?> toWire() => {
-    'image': types.contains(MediaType.image),
-    'video': types.contains(MediaType.video),
-    'sort': sort.index,
-    'after': createdAfter?.millisecondsSinceEpoch,
-    'before': createdBefore?.millisecondsSinceEpoch,
-    'minDur': minVideoDuration?.inMilliseconds,
-    'maxDur': maxVideoDuration?.inMilliseconds,
-    'gif': includeGifs,
-  };
+        'image': types.contains(MediaType.image),
+        'video': types.contains(MediaType.video),
+        'sort': sort.index,
+        'after': createdAfter?.millisecondsSinceEpoch,
+        'before': createdBefore?.millisecondsSinceEpoch,
+        'minDur': minVideoDuration?.inMilliseconds,
+        'maxDur': maxVideoDuration?.inMilliseconds,
+        'gif': includeGifs,
+      };
 
   @override
   bool operator ==(Object other) =>
@@ -94,12 +95,12 @@ class MediaFilter {
 
   @override
   int get hashCode => Object.hash(
-    Object.hashAllUnordered(types),
-    sort,
-    createdAfter,
-    createdBefore,
-    minVideoDuration,
-    maxVideoDuration,
-    includeGifs,
-  );
+        Object.hashAllUnordered(types),
+        sort,
+        createdAfter,
+        createdBefore,
+        minVideoDuration,
+        maxVideoDuration,
+        includeGifs,
+      );
 }

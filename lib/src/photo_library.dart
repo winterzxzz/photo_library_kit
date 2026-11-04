@@ -24,12 +24,14 @@ abstract final class PhotoLibrary {
   /// Current authorization without prompting the user.
   static Future<PermissionState> getPermissionState([
     PermissionRequest request = const PermissionRequest(),
-  ]) => _p.getPermissionState(request);
+  ]) =>
+      _p.getPermissionState(request);
 
   /// Prompts the user if needed and returns the resulting state.
   static Future<PermissionState> requestPermission([
     PermissionRequest request = const PermissionRequest(),
-  ]) => _p.requestPermission(request);
+  ]) =>
+      _p.requestPermission(request);
 
   /// Lets a user with [PermissionState.limited] change the selected assets.
   static Future<void> presentLimitedPicker() => _p.presentLimitedPicker();
@@ -42,13 +44,15 @@ abstract final class PhotoLibrary {
   static Future<List<MediaAlbum>> getAlbums({
     MediaFilter filter = MediaFilter.all,
     bool includeEmpty = false,
-  }) => _p.getAlbums(filter, includeEmpty: includeEmpty);
+  }) =>
+      _p.getAlbums(filter, includeEmpty: includeEmpty);
 
   /// Number of assets in [albumId] matching [filter].
   static Future<int> getAssetCount({
     String albumId = MediaAlbum.allId,
     MediaFilter filter = MediaFilter.all,
-  }) => _p.getAssetCount(albumId, filter);
+  }) =>
+      _p.getAssetCount(albumId, filter);
 
   /// Assets in `[start, end)` for [albumId]. Prefer `AssetPagedList` for
   /// scrolling UIs; it pages, caches and de-duplicates for you.
@@ -70,23 +74,26 @@ abstract final class PhotoLibrary {
   static Future<Uint8List?> getThumbnailBytes(
     MediaAsset asset,
     ThumbnailOptions options,
-  ) => _p.getThumbnail(
-    asset,
-    options,
-    requestId: ThumbnailScheduler.nextRequestId(),
-  );
+  ) =>
+      _p.getThumbnail(
+        asset,
+        options,
+        requestId: ThumbnailScheduler.nextRequestId(),
+      );
 
   /// Pre-renders thumbnails natively so they appear instantly later.
   /// A no-op on platforms without a native thumbnail cache.
   static Future<void> startCaching(
     List<MediaAsset> assets,
     ThumbnailOptions options,
-  ) => _p.startCaching([for (final a in assets) a.id], options);
+  ) =>
+      _p.startCaching([for (final a in assets) a.id], options);
 
   static Future<void> stopCaching(
     List<MediaAsset> assets,
     ThumbnailOptions options,
-  ) => _p.stopCaching([for (final a in assets) a.id], options);
+  ) =>
+      _p.stopCaching([for (final a in assets) a.id], options);
 
   /// A readable file for [asset].
   ///
@@ -106,7 +113,8 @@ abstract final class PhotoLibrary {
   static Future<MediaAsset?> saveImage(
     Uint8List bytes, {
     required String filename,
-  }) => _p.saveImage(bytes, filename: filename);
+  }) =>
+      _p.saveImage(bytes, filename: filename);
 
   /// Saves the video at [path] to the library.
   static Future<MediaAsset?> saveVideo(String path, {String? filename}) =>
@@ -131,12 +139,13 @@ extension MediaAlbumQueries on MediaAlbum {
     MediaFilter filter = MediaFilter.all,
     int start = 0,
     required int end,
-  }) => PhotoLibrary.getAssets(
-    albumId: id,
-    filter: filter,
-    start: start,
-    end: end,
-  );
+  }) =>
+      PhotoLibrary.getAssets(
+        albumId: id,
+        filter: filter,
+        start: start,
+        end: end,
+      );
 }
 
 extension MediaAssetFiles on MediaAsset {
