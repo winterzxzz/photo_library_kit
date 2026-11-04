@@ -166,3 +166,7 @@ PhotoLibraryPlatform.instance = MyFakePlatform();
 ```
 
 See `test/fake_platform.dart`.
+
+## License
+
+MIT © winterzxzz. See [LICENSE](LICENSE).
