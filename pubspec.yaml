@@ -10,6 +10,20 @@ topics:
   - image-picker
   - video
 
+screenshots:
+  - description: WeChat-style multi image picker with numbered selection
+    path: doc/images/wechat-picker.webp
+  - description: Instagram-style photo picker with square crop preview
+    path: doc/images/instagram-picker.webp
+  - description: Album list with cover thumbnails and counts
+    path: doc/images/wechat-albums.webp
+  - description: Full-screen swipe preview with zoom
+    path: doc/images/wechat-preview.webp
+  - description: Photo and video gallery grid with filters
+    path: doc/images/api-gallery.webp
+  - description: Asset metadata and file access
+    path: doc/images/asset-details.webp
+
 environment:
   sdk: ^3.5.0
   flutter: '>=3.24.0'
