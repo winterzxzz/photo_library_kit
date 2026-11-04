@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../platform/photo_library_platform.dart';
+import '../types/media_asset.dart';
 import '../types/thumbnail_options.dart';
 
 /// Cancels a scheduled thumbnail request.
@@ -53,12 +54,12 @@ class ThumbnailScheduler {
   /// Resolves to the encoded bytes, or `null` when the asset is gone or the
   /// request was cancelled.
   Future<Uint8List?> schedule(
-    String assetId,
+    MediaAsset asset,
     ThumbnailOptions options, {
     ThumbnailCancelToken? token,
   }) {
     if (token?.isCancelled ?? false) return SynchronousFuture(null);
-    final job = _Job(assetId, options, nextRequestId());
+    final job = _Job(asset, options, nextRequestId());
     token?._onCancel = () => _cancel(job);
     _stack.add(job);
     _pump();
@@ -86,7 +87,7 @@ class ThumbnailScheduler {
     job.started = true;
     try {
       final bytes = await PhotoLibraryPlatform.instance.getThumbnail(
-        job.assetId,
+        job.asset,
         job.options,
         requestId: job.requestId,
       );
@@ -101,9 +102,9 @@ class ThumbnailScheduler {
 }
 
 class _Job {
-  _Job(this.assetId, this.options, this.requestId);
+  _Job(this.asset, this.options, this.requestId);
 
-  final String assetId;
+  final MediaAsset asset;
   final ThumbnailOptions options;
   final int requestId;
   final Completer<Uint8List?> completer = Completer();

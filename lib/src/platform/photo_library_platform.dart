@@ -52,7 +52,7 @@ abstract class PhotoLibraryPlatform extends PlatformInterface {
   /// Encoded thumbnail bytes or `null` if the asset vanished or was cancelled.
   /// [requestId] lets [cancelThumbnail] abort the native work.
   Future<Uint8List?> getThumbnail(
-    String id,
+    MediaAsset asset,
     ThumbnailOptions options, {
     required int requestId,
   });

@@ -45,11 +45,11 @@ class FakePlatform extends PhotoLibraryPlatform
 
   @override
   Future<Uint8List?> getThumbnail(
-    String id,
+    MediaAsset asset,
     ThumbnailOptions options, {
     required int requestId,
   }) {
-    thumbOrder.add(id);
+    thumbOrder.add(asset.id);
     return (thumbs[requestId] = Completer()).future;
   }
 

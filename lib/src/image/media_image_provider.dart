@@ -93,7 +93,7 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
     ThumbnailCancelToken token,
   ) async {
     final bytes = await (scheduler ?? ThumbnailScheduler.instance).schedule(
-      key.asset.id,
+      key.asset,
       key.options,
       token: token,
     );

@@ -100,11 +100,12 @@ class MethodChannelPhotoLibrary extends PhotoLibraryPlatform {
 
   @override
   Future<Uint8List?> getThumbnail(
-    String id,
+    MediaAsset asset,
     ThumbnailOptions options, {
     required int requestId,
   }) => _invoke<Uint8List>('getThumbnail', {
-    'id': id,
+    'id': asset.id,
+    'type': asset.type.index,
     'rid': requestId,
     ...options.toWire(),
   });

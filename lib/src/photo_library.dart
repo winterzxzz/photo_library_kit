@@ -71,7 +71,7 @@ abstract final class PhotoLibrary {
     MediaAsset asset,
     ThumbnailOptions options,
   ) => _p.getThumbnail(
-    asset.id,
+    asset,
     options,
     requestId: ThumbnailScheduler.nextRequestId(),
   );
