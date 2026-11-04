@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'image/thumbnail_scheduler.dart';
 import 'platform/photo_library_platform.dart';
 import 'types/library_change.dart';
 import 'types/media_album.dart';
@@ -69,7 +70,11 @@ abstract final class PhotoLibrary {
   static Future<Uint8List?> getThumbnailBytes(
     MediaAsset asset,
     ThumbnailOptions options,
-  ) => _p.getThumbnail(asset.id, options, requestId: _nextRequestId++);
+  ) => _p.getThumbnail(
+    asset.id,
+    options,
+    requestId: ThumbnailScheduler.nextRequestId(),
+  );
 
   /// Pre-renders thumbnails natively so they appear instantly later.
   /// A no-op on platforms without a native thumbnail cache.
@@ -89,7 +94,10 @@ abstract final class PhotoLibrary {
   /// edits are applied and HEIC stays HEIC. With [original] `true` you get the
   /// unedited original resource. On iOS the file is exported into the app
   /// cache once and reused; call [clearFileCache] to reclaim space.
-  static Future<File?> getFile(MediaAsset asset, {bool original = false}) async {
+  static Future<File?> getFile(
+    MediaAsset asset, {
+    bool original = false,
+  }) async {
     final path = await _p.getFilePath(asset.id, original: original);
     return path == null ? null : File(path);
   }
@@ -115,8 +123,6 @@ abstract final class PhotoLibrary {
   /// Debounced library change notifications. The native observer only runs
   /// while this stream has listeners.
   static Stream<LibraryChange> get changes => _p.changes;
-
-  static int _nextRequestId = 1 << 30;
 }
 
 /// Convenience accessors so call sites read naturally.
