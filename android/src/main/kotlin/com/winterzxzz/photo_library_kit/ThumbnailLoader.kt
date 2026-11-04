@@ -85,10 +85,13 @@ internal class ThumbnailLoader(
   private fun decode(req: ThumbnailRequest, signal: CancellationSignal): Bitmap? {
     val uri = MediaQueries.contentUri(req.id, req.isVideo)
     val longest = max(req.width, req.height)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (req.isVideo || longest <= SYSTEM_THUMB_MAX)) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && longest <= SYSTEM_THUMB_MAX) {
       return resolver.loadThumbnail(uri, Size(req.width, req.height), signal)
     }
-    if (req.isVideo) return legacyVideoFrame(req)
+    if (req.isVideo) {
+      // The system video thumbnail is small; previews need a real frame.
+      return videoFrame(uri, req) ?: legacyVideoFrame(req)
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       val source = ImageDecoder.createSource(resolver, uri)
       return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
@@ -97,6 +100,35 @@ internal class ThumbnailLoader(
       }
     }
     return legacyImage(req)
+  }
+
+  private fun videoFrame(uri: android.net.Uri, req: ThumbnailRequest): Bitmap? {
+    val retriever = MediaMetadataRetriever()
+    return try {
+      resolver.openFileDescriptor(uri, "r")?.use { fd ->
+        retriever.setDataSource(fd.fileDescriptor)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+          val w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+          val h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+          val rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+          val (vw, vh) = if (rotation == 90 || rotation == 270) h to w else w to h
+          if (vw > 0 && vh > 0) {
+            // Scale to cover (or fit) the request without upscaling.
+            val scale = min(1f, if (req.cover) max(req.width / vw.toFloat(), req.height / vh.toFloat())
+            else min(req.width / vw.toFloat(), req.height / vh.toFloat()))
+            return@use retriever.getScaledFrameAtTime(
+              0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
+              (vw * scale).roundToInt().coerceAtLeast(1), (vh * scale).roundToInt().coerceAtLeast(1),
+            )
+          }
+        }
+        retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+      }
+    } catch (_: RuntimeException) {
+      null
+    } finally {
+      retriever.release()
+    }
   }
 
   @Suppress("DEPRECATION")
