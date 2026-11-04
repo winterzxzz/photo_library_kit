@@ -33,19 +33,24 @@ final class FileExporter {
     } catch {
       return done(.failure(error))
     }
-    let tmp = url.appendingPathExtension("part")
-    try? FileManager.default.removeItem(at: tmp)
+    // Unique per call so concurrent exports of the same asset never share it.
+    let tmp = dir.appendingPathComponent("\(UUID().uuidString).part")
     let options = PHAssetResourceRequestOptions()
     options.isNetworkAccessAllowed = true
     PHAssetResourceManager.default().writeData(for: resource, toFile: tmp, options: options) { error in
       if let error { try? FileManager.default.removeItem(at: tmp); return done(.failure(error)) }
       do {
         // Atomic publish so a concurrent caller never sees a half-written file.
-        try? FileManager.default.removeItem(at: url)
-        try FileManager.default.moveItem(at: tmp, to: url)
+        if FileManager.default.fileExists(atPath: url.path) {
+          try? FileManager.default.removeItem(at: tmp)  // another call won
+        } else {
+          try FileManager.default.moveItem(at: tmp, to: url)
+        }
         done(.success(url.path))
       } catch {
-        done(.failure(error))
+        try? FileManager.default.removeItem(at: tmp)
+        // Losing a move race to an identical export is still a success.
+        FileManager.default.fileExists(atPath: url.path) ? done(.success(url.path)) : done(.failure(error))
       }
     }
   }
