@@ -57,14 +57,15 @@ class _AssetThumbnailState extends State<AssetThumbnail> {
   /// Evicting it lets [MediaImageProvider] cancel the work.
   void _evictIfPending() {
     final p = _provider;
-    if (p != null && !_loaded) {
-      PaintingBinding.instance.imageCache.evict(p, includeLive: false);
-    }
+    if (p == null || _loaded) return;
+    final cache = PaintingBinding.instance.imageCache;
+    // The image may have finished without a frame reaching this widget yet;
+    // only pending entries are worth evicting.
+    if (cache.statusForKey(p).pending) cache.evict(p, includeLive: false);
   }
 
   MediaImageProvider _providerFor(BoxConstraints constraints) {
-    final options =
-        widget.options ??
+    final options = widget.options ??
         ThumbnailOptions.forCell(
           _side(constraints),
           MediaQuery.devicePixelRatioOf(context),
@@ -88,8 +89,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    final placeholder =
-        widget.placeholderColor ??
+    final placeholder = widget.placeholderColor ??
         Theme.of(context).colorScheme.surfaceContainerHighest;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -103,14 +103,13 @@ class _AssetThumbnailState extends State<AssetThumbnail> {
             height: double.infinity,
             gaplessPlayback: true,
             filterQuality: FilterQuality.medium,
-            errorBuilder:
-                widget.errorBuilder ??
+            errorBuilder: widget.errorBuilder ??
                 (context, error, stack) => Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
             frameBuilder: (context, child, frame, sync) {
               if (frame == null) return const SizedBox.expand();
               _loaded = true;
