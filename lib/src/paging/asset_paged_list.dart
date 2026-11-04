@@ -39,8 +39,8 @@ class AssetPagedList extends ChangeNotifier {
     this.pageSize = 60,
     this.maxCachedPages = 24,
     this.watchChanges = true,
-  }) : assert(pageSize > 0),
-       assert(maxCachedPages > 1);
+  })  : assert(pageSize > 0),
+        assert(maxCachedPages > 1);
 
   final String albumId;
   final MediaFilter filter;
@@ -152,20 +152,21 @@ class AssetPagedList extends ChangeNotifier {
     if (page * pageSize >= _length || _inFlight.containsKey(page)) return;
     if (_pages.containsKey(page) && !_stale.contains(page)) return;
     final gen = _generation;
-    _fetch(page, gen)
-        .then(
-          (_) {
-            if (!_disposed && gen == _generation) _notify();
-          },
-          onError: (Object e) {
-            _error = e;
-          },
-        )
-        .ignore();
+    _fetch(page, gen).then(
+      (_) {
+        if (!_disposed && gen == _generation) _notify();
+      },
+      onError: (Object e) {
+        _error = e;
+      },
+    ).ignore();
   }
 
   Future<List<MediaAsset>> _fetch(int page, int gen) {
-    return _inFlight[page] ??= () async {
+    final existing = _inFlight[page];
+    if (existing != null) return existing;
+    late final Future<List<MediaAsset>> future;
+    future = () async {
       try {
         final start = page * pageSize;
         final rows = await _platform.getAssets(
@@ -175,18 +176,27 @@ class AssetPagedList extends ChangeNotifier {
           end: (start + pageSize).clamp(0, _length),
         );
         if (!_disposed && gen == _generation) {
-          _stale.remove(page);
           _pages.remove(page);
           _pages[page] = rows;
+          // Requested while a refresh was still fetching the new count: the
+          // page may be short, so keep it stale and fetch it again on access.
+          final expected = (start + pageSize).clamp(0, _length) - start;
+          if (rows.length < expected) {
+            _stale.add(page);
+          } else {
+            _stale.remove(page);
+          }
           while (_pages.length > maxCachedPages) {
             _pages.remove(_pages.keys.first);
           }
         }
         return rows;
       } finally {
-        if (gen == _generation) _inFlight.remove(page);
+        // Only clear our own entry; a newer request may have replaced it.
+        if (identical(_inFlight[page], future)) _inFlight.remove(page);
       }
     }();
+    return _inFlight[page] = future;
   }
 
   /// Coalesces bursts of page arrivals into one rebuild.
