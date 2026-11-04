@@ -1,0 +1,5 @@
+WORKSPACE_PROTOCOL.md
+paseo.json
+build/
+.dart_tool/
+example/build/
